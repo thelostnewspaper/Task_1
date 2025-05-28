@@ -1,0 +1,86 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+&nbsp;
+&nbsp;
+
+# Load the Titanic dataset (make sure to upload train.csv to your Colab environment)
+df = pd.read_csv('train.csv')  # Change this if your file name is different
+&nbsp;
+&nbsp;
+
+print("Initial Data Info:")
+print(df.info())
+print("\nSample data:")
+print(df.head())
+&nbsp;
+&nbsp;
+
+# 1. Handling missing values
+print("\nMissing values per column:")
+print(df.isnull().sum())
+&nbsp;
+&nbsp;
+
+# Fill missing 'Age' with median
+df['Age'].fillna(df['Age'].median(), inplace=True)
+&nbsp;
+&nbsp;
+
+# 'Cabin' has many missing values, drop it
+df.drop(columns=['Cabin'], inplace=True)
+&nbsp;
+&nbsp;
+
+# Fill missing 'Embarked' with mode
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+&nbsp;
+&nbsp;
+
+# 2. Encoding categorical variables
+# Convert 'Sex' to numeric (0,1)
+le = LabelEncoder()
+df['Sex'] = le.fit_transform(df['Sex'])
+&nbsp;
+&nbsp;
+
+# One-hot encode 'Embarked'
+df = pd.get_dummies(df, columns=['Embarked'], drop_first=True)
+&nbsp;
+&nbsp;
+
+# Drop columns not needed for ML
+df.drop(columns=['PassengerId', 'Name', 'Ticket'], inplace=True)
+&nbsp;
+&nbsp;
+
+# 3. Feature scaling on numerical features
+scaler = StandardScaler()
+num_cols = ['Age', 'Fare', 'SibSp', 'Parch']
+df[num_cols] = scaler.fit_transform(df[num_cols])
+&nbsp;
+&nbsp;
+
+print("\nData sample after preprocessing:")
+print(df.head())
+&nbsp;
+&nbsp;
+
+# 4. Visualizations of Age and Fare (scaled)
+plt.figure(figsize=(12,5))
+plt.subplot(1,2,1)
+sns.histplot(df['Age'], bins=30, kde=True)
+plt.title('Distribution of Age (scaled)')
+plt.subplot(1,2,2)
+sns.histplot(df['Fare'], bins=30, kde=True)
+plt.title('Distribution of Fare (scaled)')
+plt.tight_layout()
+plt.show()
+&nbsp;
+&nbsp;
+
+# Save cleaned data
+df.to_csv('titanic_cleaned.csv', index=False)
+print("\nCleaned data saved to 'titanic_cleaned.csv'")
